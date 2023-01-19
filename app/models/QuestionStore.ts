@@ -1,4 +1,5 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import { api, GetQuestionsResult } from "../services/api"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { QuestionModel } from "./Question"
 
@@ -12,7 +13,16 @@ export const QuestionStoreModel = types
   })
   .actions(withSetPropAction)
   .views((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
-  .actions((self) => ({})) // eslint-disable-line @typescript-eslint/no-unused-vars
+  .actions((self) => ({
+    async getQuestions() {
+      const result: GetQuestionsResult = await api.getQuestions()
+      if (result.kind === "ok") {
+        self.setProp("questions", result.questions)
+      } else {
+        console.tron.error(`Error fetching questions: ${JSON.stringify(result)}`, [])
+      }
+    },
+  }))
 
 export interface QuestionStore extends Instance<typeof QuestionStoreModel> {}
 export interface QuestionStoreSnapshotOut extends SnapshotOut<typeof QuestionStoreModel> {}
